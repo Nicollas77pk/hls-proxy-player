@@ -83,7 +83,6 @@
         <!-- Player de Vídeo -->
         <div class="video-container active" id="video-container">
             <video id="player" controls>
-                <!-- Alterar o link para o proxy da Vercel -->
                 <source id="video-source" src="/api/proxy?url=http://lexus.hubns.top:80/Leonardo77/983469871/2687675.m3u8" type="application/x-mpegURL">
                 Seu navegador não suporta a tag de vídeo.
             </video>
@@ -98,8 +97,8 @@
         <div class="options_iframe">
             <a href="javascript:void(0)" onclick="changePlayerUrl('https://onplaytv.net/globorj/video.m3u8', 'application/x-mpegURL')">Transmissão 1</a>
             <a href="javascript:void(0)" onclick="changePlayerUrl(' https://cdnlv.online/globorj-globorio/index.m3u8', 'application/x-mpegURL')">Transmissão 2</a>
-            <a href="javascript:void(0)" onclick="useIframe('https://playertv.net/e/?v=nossoFutebol')">Transmissão 3</a>
-            <a href="javascript:void(0)" onclick="useIframe('https://embedcanaistv.com/globorj/')">Transmissão 4</a>
+          <a href="javascript:void(0)" onclick="useIframe('https://playertv.net/e/?v=nossoFutebol')">transmissão 3</a>
+          <a href="javascript:void(0)" onclick="useIframe('https://embedcanaistv.com/globorj/')">transmissão 4</a>
         </div>
     </div>
 
@@ -108,65 +107,77 @@
     <!-- HLS.js script -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const videoContainer = document.getElementById('video-container');
-            const iframeContainer = document.getElementById('iframe-container');
-            const video = document.getElementById('player');
-            const videoSource = document.getElementById('video-source');
-            const iframePlayer = document.getElementById('iframe-player');
-            let hls;
-            let player;
+       document.addEventListener("DOMContentLoaded", function() {
+    const videoContainer = document.getElementById('video-container');
+    const iframeContainer = document.getElementById('iframe-container');
+    const video = document.getElementById('player');
+    const videoSource = document.getElementById('video-source');
+    const iframePlayer = document.getElementById('iframe-player');
+    let hls;
+    let player;
 
-            // Função para alterar o player de vídeo
-            function changePlayerUrl(url, type) {
-                // Garantir que o iframe seja desativado
-                iframeContainer.classList.remove('active');
-                iframePlayer.src = '';
+    // Função para alterar o player de vídeo
+    function changePlayerUrl(url, type) {
+        // Garantir que o iframe seja desativado
+        iframeContainer.classList.remove('active');
+        iframePlayer.src = '';
 
-                // Ativar o player de vídeo
-                videoContainer.classList.add('active');
+        // Ativar o player de vídeo
+        videoContainer.classList.add('active');
 
-                // Pausar o vídeo atual e carregar a nova fonte
-                if (hls) {
-                    hls.destroy();
-                    hls = null;
+        // Pausar o vídeo atual e carregar a nova fonte
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+
+        video.pause();
+        videoSource.src = url;
+        videoSource.type = type;
+
+        // Verifique se Hls.js é suportado
+        if (Hls.isSupported()) {
+            hls = new Hls();
+            hls.loadSource(url);  // Carrega o link m3u8 via HLS
+            hls.attachMedia(video);  // Anexa o fluxo ao player de vídeo
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                console.log("Manifesto HLS carregado com sucesso!");
+            });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    console.error("Erro fatal HLS:", data);
                 }
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Suporte nativo para m3u8 em Safari, que já suporta HLS diretamente
+            video.src = url;
+        } else {
+            console.error("Seu navegador não suporta HLS.");
+        }
+    }
 
-                video.pause();
-                videoSource.src = url;
-                videoSource.type = type;
+    // Função para alternar para o iframe
+    function useIframe(url) {
+        // Garantir que o player de vídeo seja desativado
+        videoContainer.classList.remove('active');
+        video.pause();
 
-                if (type === 'application/x-mpegURL' && Hls.isSupported()) {
-                    hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
-                } else {
-                    video.load();
-                }
-            }
+        // Ativar o iframe e carregar a URL
+        iframeContainer.classList.add('active');
+        iframePlayer.src = url;
+    }
 
-            // Função para alternar para o iframe
-            function useIframe(url) {
-                // Garantir que o player de vídeo seja desativado
-                videoContainer.classList.remove('active');
-                video.pause();
+    // URL inicial (HLS)
+    const initialUrl = '/api/proxy?url=http://lexus.hubns.top:80/Leonardo77/983469871/2687675.m3u8';
+    changePlayerUrl(initialUrl, 'application/x-mpegURL');
 
-                // Ativar o iframe e carregar a URL
-                iframeContainer.classList.add('active');
-                iframePlayer.src = url;
-            }
+    player = new Plyr(video);
 
-            // URL inicial (HLS)
-            const initialUrl = '/api/proxy?url=http://lexus.hubns.top:80/Leonardo77/983469871/2687675.m3u8';
-            changePlayerUrl(initialUrl, 'application/x-mpegURL');
+    // Expor funções globais
+    window.changePlayerUrl = changePlayerUrl;
+    window.useIframe = useIframe;
+});
 
-            player = new Plyr(video);
-
-            // Expor funções globais
-            window.changePlayerUrl = changePlayerUrl;
-            window.useIframe = useIframe;
-        });
     </script>
 </body>     
 </html>
-
