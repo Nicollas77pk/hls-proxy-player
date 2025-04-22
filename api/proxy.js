@@ -1,24 +1,17 @@
-const fetch = require('node-fetch');
+const https = require('https');
+const http = require('http');
 
-module.exports = async (req, res) => {
-  const { url } = req.query;
+module.exports = (req, res) => {
+  const url = req.query.url;
   if (!url) return res.status(400).send("URL não fornecida.");
 
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": req.headers['user-agent'] || '',
-        "Referer": req.headers['referer'] || '',
-      }
-    });
+  const client = url.startsWith('https') ? https : http;
 
-    const contentType = response.headers.get("content-type") || 'application/octet-stream';
-    res.setHeader("Content-Type", contentType);
+  client.get(url, (streamRes) => {
+    res.setHeader('Content-Type', streamRes.headers['content-type'] || 'application/vnd.apple.mpegurl');
     res.setHeader("Access-Control-Allow-Origin", "*");
-
-    const body = await response.text();
-    res.status(200).send(body);
-  } catch (error) {
-    res.status(500).send("Erro ao obter conteúdo.");
-  }
+    streamRes.pipe(res);
+  }).on('error', () => {
+    res.status(500).send("Erro ao redirecionar o stream.");
+  });
 };
