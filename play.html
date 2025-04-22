@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Player HLS</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+  <video id="video" controls autoplay style="width: 100%; max-width: 800px;"></video>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      // Mapeamento de IDs para URLs reais
+      const streamMap = {
+        sportv1: "http://lexus.hubns.top:80/live/Leonardo77/983469871/1257207.m3u8",
+        // Adicione mais mapeamentos conforme necessário
+      };
+
+      const streamUrl = streamMap[id];
+      if (!streamUrl) {
+        alert("ID de stream inválido.");
+        return;
+      }
+
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(streamUrl)}`;
+      const video = document.getElementById("video");
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(proxyUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = proxyUrl;
+        video.addEventListener("loadedmetadata", function () {
+          video.play();
+        });
+      } else {
+        alert("Seu navegador não suporta HLS.");
+      }
+    });
+  </script>
+</body>
+</html>
