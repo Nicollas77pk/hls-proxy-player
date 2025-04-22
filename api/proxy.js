@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   // BLOQUEIO DE DOMÍNIOS EXTERNOS
-  const allowedOrigins = ['https://hls-proxy-player.vercel.app']; // Substitua pelo seu domínio
+  const allowedOrigins = ['https://hls-proxy-player.vercel.app/']; // Substitua pelo seu domínio
   const origin = req.headers.origin || '';
   const referer = req.headers.referer || '';
 
