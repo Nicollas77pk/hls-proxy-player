@@ -7,11 +7,14 @@ module.exports = async (req, res) => {
   try {
     const response = await fetch(targetUrl);
     const contentType = response.headers.get("content-type") || "application/vnd.apple.mpegurl";
-    const buffer = await response.buffer(); // Usa buffer ao invés de text()
+    const buffer = await response.buffer(); // usa buffer para garantir que o conteúdo não corrompa
 
-    res.setHeader("Content-Type", contentType);
+    // Cabeçalhos CORS
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.status(200).send(buffer); // Retorna como buffer
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Content-Type", contentType);
+
+    res.status(200).send(buffer);
   } catch (err) {
     console.error("Erro ao buscar o stream:", err);
     res.status(500).send("Erro ao buscar o stream.");
